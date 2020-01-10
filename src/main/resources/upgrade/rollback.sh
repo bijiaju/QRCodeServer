@@ -1,0 +1,1 @@
+docker run -d -P  hub.c.163.com/library/nginx

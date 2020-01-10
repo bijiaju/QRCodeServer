@@ -1,0 +1,74 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta content="text/html;charset=UTF-8"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link th:href="@{bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{bootstrap/css/bootstrap-theme.min.css}" rel="stylesheet"/>
+</head>
+<body>
+
+
+<div>
+    <span><h1>访问列表</h1></span>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>编号</th>
+            <th>主机名</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td th:text="1"></td>
+            <td th:text="${name}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+<div class="panel-heading">
+    命令：<input type="text" name="qf" list="cmds"/>
+    <datalist id="cmds">
+        <option value="restartClient">
+            <!-- <option value="Firefox">
+             <option value="Chrome">
+             <option value="Opera">
+             <option value="Safari">-->
+    </datalist>
+    <button type="button" onclick="submit()">发送命令</button>
+</div>
+
+
+<script th:src="@{jquery-1.10.2.min.js}" type="text/javascript"></script><!-- 2 -->
+<script th:src="@{bootstrap/js/bootstrap.min.js}"></script><!-- 2 -->
+
+<script th:inline="javascript">
+
+ /*   function myrefresh() { window.location.reload(); }
+    setTimeout('myrefresh()',5000); //指定5秒刷新一次*/
+
+    function submit() {
+        var texts = $(":text");
+        var cmd = $(texts[0]).val();
+        //alert(cmd);
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8082/ws/AppointSending",
+            data: {
+                "name":[[${name}]],
+                "message":cmd
+            },
+            success: function(backData) {
+                //alert(backData);
+            }
+        });
+    }
+</script>
+
+
+
+</body>
+</html>
+
+
