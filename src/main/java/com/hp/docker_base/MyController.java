@@ -1,5 +1,6 @@
 package com.hp.docker_base;
 
+import com.hp.docker_base.bean.OrderDir;
 import com.hp.docker_base.config.Contants;
 import com.hp.docker_base.util.DateUtil;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -18,11 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+
+
+import org.apache.tools.zip.ZipEntry;
+import org.apache.tools.zip.ZipOutputStream;
 
 /**
  * Created by kemp on 2018/8/15.
@@ -127,15 +131,27 @@ public class MyController {
 
             for(File file :orderFiles){
 
+                System.out.println("源文件名： "+file.getName());
 
                 BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-                zos.putNextEntry(new ZipEntry(file.getName()));
+                String fileName = new String(file.getName().getBytes(),"UTF-8");///修复中文乱码
+                System.out.println("下载文件名： "+fileName);
+                zos.putNextEntry(new ZipEntry(fileName));
+
+                //获取系统默认编码
+                System.out.println("系统默认编码：" + System.getProperty("file.encoding")); //查询结果GBK
+                //系统默认字符编码
+                System.out.println("系统默认字符编码：" + Charset.defaultCharset()); //查询结果GBK
+                //操作系统用户使用的语言
+                System.out.println("系统默认语言：" + System.getProperty("user.language")); //查询结果zh
+
 
                 int len = 0;
                 byte[] buf = new byte[10 * 1024];
                 while( (len=bis.read(buf, 0, buf.length)) != -1){
                     bos.write(buf, 0, len);
                 }
+                zos.setEncoding("UTF-8");
                 bis.close();
                 bos.flush();
             }
@@ -223,15 +239,22 @@ public class MyController {
      */
     private String setDownList(Model model) {
         //1. 初始化map集合Map<包含唯一标记的文件名, 简短文件名>  ;
-        ArrayList<String> orderDir = new ArrayList<String>();
+        ArrayList<OrderDir> orderDir = new ArrayList<OrderDir>();
 
         // 目录
         File serverDir = new File(serverPath+"/"+DateUtil.Date2Str());
+        File datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+"xxxx");
+        if(!datedest.getParentFile().exists()){ //判断文件父目录是否存在
+            datedest.getParentFile().mkdir();
+        }
         // 目录下，所有文件名
         File[] filesDir = serverDir.listFiles();//二级目录
         for(File fileDir :filesDir){
             System.out.println(fileDir.getName());//D:\All_Files\testFile\阿斯顿发
-            orderDir.add(fileDir.getName());
+            OrderDir order = new OrderDir();
+            order.setOrderName(fileDir.getName());
+            order.setOrderDate(DateUtil.getModifiedTime(fileDir));
+            orderDir.add(order);
         }
         model.addAttribute("orderDir",orderDir);
 

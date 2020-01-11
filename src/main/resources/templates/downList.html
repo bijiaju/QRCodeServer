@@ -10,13 +10,14 @@
 
 
 <div>
-
+    <div><h1 style="text-align:center">二维码管理系统</h1></div>
     <a th:href="@{'/deleteView'}" th:text="按删除日期文件"></a>
     <table class="table table-striped">
         <thead>
         <tr>
             <th>编号</th>
             <th>订单号</th>
+            <th>下单时间</th>
             <th>操作</th>
         </tr>
         </thead>
@@ -24,10 +25,11 @@
         <tr th:each="item : ${orderDir}">
 
             <td th:text="${itemStat.index+1}"></td>
-            <td th:text="${item}"></td>
+            <td th:text="${item.orderName}"></td>
+            <td th:text="${item.orderDate}"></td>
             <td>
-                <a th:href="@{'/dw/'+${item}}" th:text="下载"></a>
-                <a th:href="@{'/delete/'+${item}}" th:text="删除"></a>
+                <a th:href="@{'/dw/'+${item.orderName}}" th:text="下载"></a>
+                <a th:href="@{'/delete/'+${item.orderName}}" th:text="删除"></a>
             </td>
         </tr>
         </tbody>
@@ -64,29 +66,4 @@
 
 </body>
 </html>
-<!--<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">访问model</h3>
-    </div>
-   &lt;!&ndash; <div class="panel-body">
-        <span th:text="${singlePerson.name}"></span>
-    </div>&ndash;&gt;
-</div>-->
-
-<!--<div th:if="${not #lists.isEmpty(people)}">
-    &lt;!&ndash;<div class="panel panel-primary">
-        <div class="panel-heading">
-            <h3 class="panel-title">列表</h3>
-        </div>
-        <div class="panel-body">
-            <ul class="list-group">
-                <li class="list-group-item" th:each="person:${people}">
-                    <span th:text="${person.name}"></span>
-                    <span th:text="${person.age}"></span>
-                    <button class="btn" th:onclick="'getName(\'' + ${person.name} + '\');'">获得名字</button>
-                </li>
-            </ul>
-        </div>
-    </div>&ndash;&gt;
-</div>-->
 
