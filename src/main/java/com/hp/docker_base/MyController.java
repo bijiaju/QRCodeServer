@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -45,6 +46,8 @@ public class MyController {
         return "index";
     }
 
+
+
     @RequestMapping("/deleteView")
     public String deleteView(Model model){
         String res = setDownDateList(model);
@@ -70,7 +73,7 @@ public class MyController {
     public String deleteFile(@PathVariable("fileDir") String fileDir,Model model) {
         File orderDir = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir);
         deleteFile(orderDir);
-        String downList = setDownList(model);
+        String downList = setDownList(model,null);
         return downList;
     }
 
@@ -85,6 +88,28 @@ public class MyController {
         deleteFile(orderDir);
         String downList = setDownDateList(model);
         return downList;
+    }
+
+
+
+
+    /**
+     * 查看当前文件夹下的图片
+     * @param model
+     * @return
+     */
+    @RequestMapping("/list/{fileDir}")
+    public String list(@PathVariable("fileDir") String fileDir,Model model){
+        File orderDirs11 = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir);
+        File[] pics = orderDirs11.listFiles();
+        // 目录下，所有文件名
+        ArrayList<String> pics1 = new ArrayList<String>();
+        for(File file:pics){
+            pics1.add(file.getName());
+        }
+        model.addAttribute("pics",pics1);
+        model.addAttribute("fileDir",fileDir);
+        return "list";
     }
 
     public static void deleteFile(File file){
@@ -165,6 +190,52 @@ public class MyController {
 
 
     /**
+     * 删除单个文件
+     * @return
+     */
+    @RequestMapping("/delete/{fileDir}/{fileName}")
+    public String deleteSingleFile(@PathVariable("fileDir") String fileDir,Model model,@PathVariable("fileName") String fileName) {
+        File file111 = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir+"/"+fileName);
+        file111.delete();
+        //String downList = setDownDateList(model);
+        File orderDirs11 = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir);
+        File[] pics = orderDirs11.listFiles();
+        // 目录下，所有文件名
+        ArrayList<String> pics1 = new ArrayList<String>();
+        for(File file:pics){
+            pics1.add(file.getName());
+        }
+        model.addAttribute("pics",pics1);
+        model.addAttribute("fileDir",fileDir);
+        return "list";
+    }
+
+    /**
+     * 从项目文件升级文件
+     * @param response
+     * @return
+     */
+    @RequestMapping("/dwsingle/{fileDir}/{fileName}")
+    public String downLoad(@PathVariable("fileName") String fileName,HttpServletResponse response,@PathVariable("fileDir") String fileDir) throws Exception{
+        File file = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir+"/"+fileName);
+        String filename = file.getName();
+        try {
+            filename = new String(filename.getBytes(), "ISO-8859-1");//为了解决中文下载乱码问题
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        response.setContentType("application/force-download");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + filename);
+
+        OutputStream os = response.getOutputStream();
+        FileInputStream fis = new FileInputStream(file);
+        IOUtils.copy(fis, os);
+        return null;
+
+    }
+
+
+    /**
      * 从项目文件升级文件
      * @param response
      * @return
@@ -204,10 +275,20 @@ public class MyController {
      */
     @RequestMapping("/download/downLoadList")
     public String downLoadList(Model model) throws Exception{
-        String res = setDownList(model);
+        String res = setDownList(model,null);
         return res;
     }
 
+
+    /**
+     * 下载单个文件
+     * @return
+     */
+    @RequestMapping("/listDate/{date}")
+    public String listDate(@PathVariable("date") String date,Model model) throws Exception{
+        String res = setDownList(model,date);
+        return res;
+    }
 
 
 
@@ -237,13 +318,24 @@ public class MyController {
      * @param model
      * @return
      */
-    private String setDownList(Model model) {
+    private String setDownList(Model model,String date) {
         //1. 初始化map集合Map<包含唯一标记的文件名, 简短文件名>  ;
         ArrayList<OrderDir> orderDir = new ArrayList<OrderDir>();
 
+        File serverDir = null;
+        if(StringUtils.isEmpty(date)){
+            serverDir = new File(serverPath+"/"+DateUtil.Date2Str());
+        }else{
+            serverDir = new File(serverPath+"/"+date);
+        }
         // 目录
-        File serverDir = new File(serverPath+"/"+DateUtil.Date2Str());
-        File datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+"xxxx");
+        File datedest = null;
+        if(StringUtils.isEmpty(date)){
+            datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+"xxxx");
+        }else{
+            datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+"xxxx");
+        }
+      //  File datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+"xxxx");
         if(!datedest.getParentFile().exists()){ //判断文件父目录是否存在
             datedest.getParentFile().mkdir();
         }
@@ -257,7 +349,7 @@ public class MyController {
             orderDir.add(order);
         }
         model.addAttribute("orderDir",orderDir);
-
+        model.addAttribute("date",DateUtil.Date2Str());
         return "downList";
     }
 
@@ -266,7 +358,7 @@ public class MyController {
      * */
     @RequestMapping(value="multifileUpload",method= RequestMethod.POST)
     public @ResponseBody
-    String multifileUpload(@RequestParam(defaultValue = "")String orderId,HttpServletRequest request,Model model) throws UnsupportedEncodingException {
+    String multifileUpload(@RequestParam(defaultValue = "")String orderId,String remark,HttpServletRequest request,Model model) throws UnsupportedEncodingException {
 
         //判断订单Id
 

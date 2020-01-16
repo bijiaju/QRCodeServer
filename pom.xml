@@ -135,9 +135,9 @@
                 <version>1.0.0</version>
                 <configuration>
                     <!-- docker私服的地址 -->
-                    <dockerHost>http://192.168.1.129:2375</dockerHost>
+                    <dockerHost>http://192.168.1.76:2375</dockerHost>
                     <!--最终生成 镜像名称以及版本号，注意镜像名为小写-->
-                    <imageName>192.168.1.129:5000/qrserver:1.0.0</imageName>
+                    <imageName>192.168.1.76:5000/qrserver:1.0.0</imageName>
                     <!--依赖的基础镜像-->
                     <!--  <baseImage>hub.c.163.com/r00txx/java8</baseImage>-->
                      <!--Dockerfile的位置 -->

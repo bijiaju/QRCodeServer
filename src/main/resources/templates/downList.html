@@ -8,16 +8,24 @@
 </head>
 <body>
 
-
 <div>
-    <div><h1 style="text-align:center">二维码管理系统</h1></div>
-    <a th:href="@{'/deleteView'}" th:text="按删除日期文件"></a>
-    <table class="table table-striped">
+    <div><h1 style="text-align:center" th:text="${date}+'上传数据'"></h1></div>
+
+    <table class="table table-bordered"  align="center" border="1">
+        <div style="text-align:center;">
+             <a th:href="@{'/deleteView'}" th:text="按日期删除文件"></a>
+        </div>
+
         <thead>
+        <tr>
+            <th class="text-danger">请输入查询日期：</th>
+            <td><input id="dateId" type="date"  name="date"/></td>
+            <td><input type="button" class="btn btn-success" value="查询" onclick="submit()"/></td>
+        </tr>
         <tr>
             <th>编号</th>
             <th>订单号</th>
-            <th>下单时间</th>
+            <th>上传时间</th>
             <th>操作</th>
         </tr>
         </thead>
@@ -25,7 +33,9 @@
         <tr th:each="item : ${orderDir}">
 
             <td th:text="${itemStat.index+1}"></td>
-            <td th:text="${item.orderName}"></td>
+            <td>
+                <a th:href="@{'/list/'+${item.orderName}}" th:text="${item.orderName}"></a>
+            </td>
             <td th:text="${item.orderDate}"></td>
             <td>
                 <a th:href="@{'/dw/'+${item.orderName}}" th:text="下载"></a>
@@ -34,22 +44,20 @@
         </tr>
         </tbody>
     </table>
-    
 
 </div>
 
 
 
-<script th:src="@{jquery-1.10.2.min.js}" type="text/javascript"></script><!-- 2 -->
+<script th:src="@{jquery-1.10.2.min.js}" type="text/javascript"></script>
 <script th:src="@{bootstrap/js/bootstrap.min.js}"></script><!-- 2 -->
-
+<script src="jquery-1.10.2.min.js"></script>
 <script th:inline="javascript">
 
     function submit() {
-        var texts = $(":text");
-        var cmd = $(texts[0]).val();
-        //alert(cmd);
-        $.ajax({
+        var date = $("#dateId").val();
+        alert(date);
+       /* $.ajax({
             type: "POST",
             url: "http://localhost:8082/ws/execCmd",
             data: {
@@ -58,7 +66,7 @@
             success: function(backData) {
                 //alert(backData);
             }
-        });
+        });*/
     }
 </script>
 

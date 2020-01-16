@@ -26,6 +26,9 @@
             <td th:text="${itemStat.index+1}"></td>
             <td th:text="${item}"></td>
             <td>
+                <a th:href="@{'/listDate/'+${item}}" th:text="${item}"></a>
+            </td>
+            <td>
                 <a th:href="@{'/deleteDirByDate/'+${item}}" th:text="删除"></a>
             </td>
         </tr>

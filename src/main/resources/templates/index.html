@@ -12,24 +12,45 @@
 <div>
     <div>
         <div><h1 style="text-align:center">二维码激光雕刻上传系统</h1></div>
-        <div class="panel-heading" style="float:left;">
 
-            <div class="input-group">
+            <div style="width:100%;text-align:center">
 
                 <form id="uploadForm"  action="multifileUpload" method="post" enctype="multipart/form-data" >
-                    <span>请输入订单号：</span>
-                    <input id="orderId" type="text"  name="orderId"/>
-                    <p>必传文件1: <input type="file" name="fileName"/></p>
-                    <p>选择文件2: <input type="file" name="fileName"/></p>
-                    <p>选择文件3: <input type="file" name="fileName"/></p>
-                    <p><input type="submit" class="btn btn-success" value="提交"/></p>
 
+                    <table class="table table-bordered"  align="center">
+                        <tr>
+                            <th class="text-danger">* 请输入订单号：</th>
+                            <td><input id="orderId" type="text"  name="orderId"/></td>
+
+                        </tr>
+                        <tr>
+                            <th class="text-danger">* 必传文件1:</th>
+                            <td><input type="file" name="fileName"/></td>
+                            <td></td>
+                        </tr>
+
+                        <tr>
+                            <th class="text-primary">选传文件2:</th>
+                            <td><input type="file" name="fileName"/></td>
+                            <td></td>
+                        </tr>
+
+                        <tr>
+                            <th class="text-primary">选传文件3:</th>
+                            <td><input type="file" name="fileName"/></td>
+                            <td></td>
+                        </tr>
+                      <!--  <tr>
+                            <th class="text-primary">备注内容：</th>
+                            <td><input id="remark" type="text"  name="remark"/></td>
+                            <td></td>
+                        </tr>-->
+                    </table>
+                    <button id="getResult" type="submit" class="btn btn-success btn-primary btn-lg btn-block">上传</button></center>
+                   <!-- <p><input type="submit" class="btn btn-success" value="提交"/></p>-->
                 </form>
 
-
             </div>
-
-        </div>
 
     </div>
 
@@ -37,8 +58,9 @@
 
 
 
-<script th:src="@{jquery-1.10.2.min.js}" type="text/javascript"></script><!-- 2 -->
-<script th:src="@{bootstrap/js/bootstrap.min.js}"></script><!-- 2 -->
+<!--<script th:src="@{jquery-1.10.2.min.js}" type="text/javascript"></script>&lt;!&ndash; 2 &ndash;&gt;-->
+<script th:src="@{/static/bootstrap/js/bootstrap.min.js}"></script><!-- 2 -->
+<script src="jquery-1.10.2.min.js"></script>
 
 <script th:inline="javascript">
     //action="multifileUpload"
