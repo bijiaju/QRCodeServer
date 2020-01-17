@@ -5,22 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link th:href="@{bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link th:href="@{bootstrap/css/bootstrap-theme.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
 
 <div>
     <div><h1 style="text-align:center" th:text="${date}+'上传数据'"></h1></div>
 
-    <table class="table table-bordered"  align="center" border="1">
+    <table class="table table table-hover"  align="center" border="1">
         <div style="text-align:center;">
-             <a th:href="@{'/deleteView'}" th:text="按日期删除文件"></a>
+             <a th:href="@{'/deleteView'}" th:text="返回首页"></a>
         </div>
 
         <thead>
         <tr>
-            <th class="text-danger">请输入查询日期：</th>
-            <td><input id="dateId" type="date"  name="date"/></td>
-            <td><input type="button" class="btn btn-success" value="查询" onclick="submit()"/></td>
+            <th class="text-danger">请输入查询单号：</th>
+            <td><input id="tx_search" type="text"  name="text"/>
+                <!--<input type="text"  name="qf" list="files"/>
+                <datalist id="files">
+                    <option value="updateDwSource###1.更新下载源">
+                    <option value="dwUpgradeFile###2.下载升级文件">
+                    <option value="formatCmd###3.格式化脚本">
+                    <option value="startApp###4.启动项目">
+
+                        &lt;!&ndash; <option value="Firefox">
+                         <option value="Chrome">
+                         <option value="restartClient">
+                         <option value="Opera">
+                         <option value="Safari">&ndash;&gt;
+                </datalist>-->
+
+            </td>
+            <td><!--<input type="button" class="btn btn-success" value="查询" id="bt_search"/>--><a id="a_cx" th:href="@{'/selectDir/'+${date}+'/'}" th:text="查询"></a></td>
+            <td><p class="text-warning">注意：直接复制内容到查询框，无需清除空格</p></td>
         </tr>
         <tr>
             <th>编号</th>
@@ -34,12 +53,12 @@
 
             <td th:text="${itemStat.index+1}"></td>
             <td>
-                <a th:href="@{'/list/'+${item.orderName}}" th:text="${item.orderName}"></a>
+                <a th:href="@{'/list/'+${date}+'/'+${item.orderName}}" th:text="${item.orderName}"></a>
             </td>
             <td th:text="${item.orderDate}"></td>
             <td>
-                <a th:href="@{'/dw/'+${item.orderName}}" th:text="下载"></a>
-                <a th:href="@{'/delete/'+${item.orderName}}" th:text="删除"></a>
+                <a th:href="@{'/dw/'+${date}+'/'+${item.orderName}}" th:text="下载"></a>
+                <a th:href="@{'/deleteDir/'+${date}+'/'+${item.orderName}}" th:text="删除"></a>
             </td>
         </tr>
         </tbody>
@@ -54,20 +73,35 @@
 <script src="jquery-1.10.2.min.js"></script>
 <script th:inline="javascript">
 
-    function submit() {
-        var date = $("#dateId").val();
-        alert(date);
-       /* $.ajax({
-            type: "POST",
-            url: "http://localhost:8082/ws/execCmd",
-            data: {
-                "cmd":cmd
-            },
-            success: function(backData) {
-                //alert(backData);
-            }
-        });*/
-    }
+
+
+    $(document).ready(function(){
+        var search_value = null;
+        $('#tx_search').on('input propertychange', function() {
+             search_value = $("#tx_search").val().trim();
+            var url= $("#a_cx").attr("href");
+            $("#a_cx").attr("href",url+search_value);
+        });
+
+    });
+
+
+
+      //  $("a").attr("href","http://www.softwhy.com");
+
+        /* $.ajax({
+             url: '/selectDir/'+'2020-01-17'+'/'+search_value ,
+             type: 'get',
+             cache: false,
+             processData: false,
+             contentType: false,
+             async: false,
+             success: function (backDate) {
+             }
+         })*/
+
+
+
 </script>
 
 

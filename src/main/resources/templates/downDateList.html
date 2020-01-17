@@ -10,9 +10,10 @@
 
 
 <div>
-    <div><h1 style="text-align:center">按删除后台文件</h1></div>
+    <div><h1 style="text-align:center">后台文件</h1></div>
 
     <table class="table table-striped">
+
         <thead>
         <tr>
             <th>编号</th>
@@ -24,7 +25,6 @@
         <tr th:each="item : ${dateDir}">
 
             <td th:text="${itemStat.index+1}"></td>
-            <td th:text="${item}"></td>
             <td>
                 <a th:href="@{'/listDate/'+${item}}" th:text="${item}"></a>
             </td>

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link th:href="@{bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link th:href="@{bootstrap/css/bootstrap-theme.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
 
@@ -14,8 +17,8 @@
 
     <table class="table table-bordered"  align="center" border="1">
         <div style="text-align:center;">
-             <a th:href="@{'/deleteView'}" th:text="按日期删除文件"></a>
-            <a th:href="@{'/download/downLoadList'}" th:text="返回首页"></a>
+             <a th:href="@{'/deleteView'}" th:text="返回首页"></a>
+            <a th:href="@{'/listDate/'+${date}}" th:text="返回上一页"></a>
         </div>
         <thead>
 
@@ -31,8 +34,8 @@
             <td th:text="${itemStat.index+1}"></td>
             <td th:text="${item}"></td>
             <td>
-                <a th:href="@{'/dwsingle/'+${fileDir}+'/'+${item}}" th:text="下载"></a>
-                <a th:href="@{'/delete/'+${fileDir}+'/'+${item}}" th:text="删除"></a>
+                <a th:href="@{'/dwsingle/'+${date}+'/'+${fileDir}+'/'+${item}}" th:text="下载"></a>
+                <a th:href="@{'/deleteFile/'+${date}+'/'+${fileDir}+'/'+${item}}" th:text="删除"></a>
             </td>
         </tr>
         </tbody>

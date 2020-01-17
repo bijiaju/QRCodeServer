@@ -1,16 +1,13 @@
 package com.hp.docker_base;
 
 import com.hp.docker_base.bean.OrderDir;
-import com.hp.docker_base.config.Contants;
 import com.hp.docker_base.util.DateUtil;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,9 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 import org.apache.tools.zip.ZipEntry;
@@ -46,7 +41,16 @@ public class MyController {
         return "index";
     }
 
+    @RequestMapping("/upload")
+    //@ResponseBody
+    public String index2(Model model){
+        return "upload";
+    }
 
+    @RequestMapping("/successUP")
+    public String successUP(Model model){
+        return "successUP";
+    }
 
     @RequestMapping("/deleteView")
     public String deleteView(Model model){
@@ -56,28 +60,41 @@ public class MyController {
 
 
 
-    @RequestMapping("/p2p")
-    public String execSQL(Model model, @RequestParam(defaultValue = "")String name, String message){
-        model.addAttribute("name",name);
-        model.addAttribute("message",message);
-        System.out.println(message);
-        return "p2p";
+
+    /**
+     * 删除文件夹文件
+     * @return
+     */
+    @RequestMapping("/deleteDir/{date}/{fileDir}")
+    public String deleteDir(@PathVariable("date") String date,@PathVariable("fileDir") String fileDir,Model model) {
+        if(StringUtils.isEmpty(date)){
+            date = DateUtil.Date2Str();
+        }
+        File orderDir = new File(serverPath+"/"+date+"/"+fileDir);
+        deleteFile(orderDir);
+        String downList = setDownList(model,date,null);
+        return downList;
     }
 
+    /**
+     * 查询文件
+     * @return
+     */
+    @RequestMapping("/selectDir/{date}/{search_value}")
+    public String selectDir(@PathVariable("date") String date,@PathVariable("search_value") String search_value,Model model){
+        String res = setDownList(model,date,search_value);
+        return res;
+    }
 
     /**
      * 删除文件
      * @return
      */
-    @RequestMapping("/delete/{fileDir}")
-    public String deleteFile(@PathVariable("fileDir") String fileDir,Model model) {
-        File orderDir = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir);
-        deleteFile(orderDir);
-        String downList = setDownList(model,null);
-        return downList;
+    @RequestMapping("/selectDir/{date}/")
+    public String selectDir1(@PathVariable("date") String date,Model model){
+        String res = setDownList(model,date,null);
+        return res;
     }
-
-
     /**
      * 删除文件
      * @return
@@ -98,9 +115,12 @@ public class MyController {
      * @param model
      * @return
      */
-    @RequestMapping("/list/{fileDir}")
-    public String list(@PathVariable("fileDir") String fileDir,Model model){
-        File orderDirs11 = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir);
+    @RequestMapping("/list/{date}/{fileDir}")
+    public String list(@PathVariable("date") String date,@PathVariable("fileDir") String fileDir,Model model){
+        if(StringUtils.isEmpty(date)){
+             date = DateUtil.Date2Str();
+        }
+        File orderDirs11 = new File(serverPath+"/"+date+"/"+fileDir);
         File[] pics = orderDirs11.listFiles();
         // 目录下，所有文件名
         ArrayList<String> pics1 = new ArrayList<String>();
@@ -109,6 +129,7 @@ public class MyController {
         }
         model.addAttribute("pics",pics1);
         model.addAttribute("fileDir",fileDir);
+        model.addAttribute("date",date);
         return "list";
     }
 
@@ -140,15 +161,18 @@ public class MyController {
      * @param response
      * @return
      */
-    @RequestMapping("/dw/{fileDir}")
-    public String downLoad1(@PathVariable("fileDir") String fileDir,HttpServletResponse response) throws Exception{
+    @RequestMapping("/dw/{date}/{fileDir}")
+    public String downLoad1(@PathVariable("date") String date,@PathVariable("fileDir") String fileDir,HttpServletResponse response) throws Exception{
 
         try{
             String zipName = fileDir+".zip";
             response.setContentType("application/x-msdownload");
             response.setHeader("content-disposition", "attachment;filename="+ URLEncoder.encode(zipName, "utf-8"));
 
-            File orderDir = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir);
+            if(StringUtils.isEmpty(date)){
+                date = DateUtil.Date2Str();
+            }
+            File orderDir = new File(serverPath+"/"+date+"/"+fileDir);
             File orderFiles[] = orderDir.listFiles();
 
             ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
@@ -193,12 +217,15 @@ public class MyController {
      * 删除单个文件
      * @return
      */
-    @RequestMapping("/delete/{fileDir}/{fileName}")
-    public String deleteSingleFile(@PathVariable("fileDir") String fileDir,Model model,@PathVariable("fileName") String fileName) {
-        File file111 = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir+"/"+fileName);
+    @RequestMapping("/deleteFile/{date}/{fileDir}/{fileName}")
+    public String deleteSingleFile(@PathVariable("date") String date,@PathVariable("fileDir") String fileDir,Model model,@PathVariable("fileName") String fileName) {
+        if(StringUtils.isEmpty(date)){
+            date = DateUtil.Date2Str();
+        }
+        File file111 = new File(serverPath+"/"+date+"/"+fileDir+"/"+fileName);
         file111.delete();
         //String downList = setDownDateList(model);
-        File orderDirs11 = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir);
+        File orderDirs11 = new File(serverPath+"/"+date+"/"+fileDir);
         File[] pics = orderDirs11.listFiles();
         // 目录下，所有文件名
         ArrayList<String> pics1 = new ArrayList<String>();
@@ -215,9 +242,12 @@ public class MyController {
      * @param response
      * @return
      */
-    @RequestMapping("/dwsingle/{fileDir}/{fileName}")
-    public String downLoad(@PathVariable("fileName") String fileName,HttpServletResponse response,@PathVariable("fileDir") String fileDir) throws Exception{
-        File file = new File(serverPath+"/"+DateUtil.Date2Str()+"/"+fileDir+"/"+fileName);
+    @RequestMapping("/dwsingle/{date}/{fileDir}/{fileName}")
+    public String downLoad(@PathVariable("date") String date,@PathVariable("fileName") String fileName,HttpServletResponse response,@PathVariable("fileDir") String fileDir) throws Exception{
+        if(StringUtils.isEmpty(date)){
+            date = DateUtil.Date2Str();
+        }
+        File file = new File(serverPath+"/"+date+"/"+fileDir+"/"+fileName);
         String filename = file.getName();
         try {
             filename = new String(filename.getBytes(), "ISO-8859-1");//为了解决中文下载乱码问题
@@ -275,7 +305,7 @@ public class MyController {
      */
     @RequestMapping("/download/downLoadList")
     public String downLoadList(Model model) throws Exception{
-        String res = setDownList(model,null);
+        String res = setDownList(model,null,null);
         return res;
     }
 
@@ -286,7 +316,7 @@ public class MyController {
      */
     @RequestMapping("/listDate/{date}")
     public String listDate(@PathVariable("date") String date,Model model) throws Exception{
-        String res = setDownList(model,date);
+        String res = setDownList(model,date,null);
         return res;
     }
 
@@ -318,38 +348,40 @@ public class MyController {
      * @param model
      * @return
      */
-    private String setDownList(Model model,String date) {
+    private String setDownList(Model model,String date,String searchValue) {
         //1. 初始化map集合Map<包含唯一标记的文件名, 简短文件名>  ;
         ArrayList<OrderDir> orderDir = new ArrayList<OrderDir>();
-
-        File serverDir = null;
         if(StringUtils.isEmpty(date)){
-            serverDir = new File(serverPath+"/"+DateUtil.Date2Str());
-        }else{
-            serverDir = new File(serverPath+"/"+date);
+            date = DateUtil.Date2Str();
         }
-        // 目录
-        File datedest = null;
-        if(StringUtils.isEmpty(date)){
-            datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+"xxxx");
-        }else{
-            datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+"xxxx");
-        }
-      //  File datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+"xxxx");
-        if(!datedest.getParentFile().exists()){ //判断文件父目录是否存在
-            datedest.getParentFile().mkdir();
-        }
+        File serverDir = new File(serverPath+"/"+date);
         // 目录下，所有文件名
         File[] filesDir = serverDir.listFiles();//二级目录
         for(File fileDir :filesDir){
             System.out.println(fileDir.getName());//D:\All_Files\testFile\阿斯顿发
-            OrderDir order = new OrderDir();
-            order.setOrderName(fileDir.getName());
-            order.setOrderDate(DateUtil.getModifiedTime(fileDir));
-            orderDir.add(order);
+            if(StringUtils.isEmpty(searchValue)){//查询全部
+                OrderDir order = new OrderDir();
+                order.setOrderName(fileDir.getName());
+                order.setOrderDate(DateUtil.getModifiedTime(fileDir));
+                orderDir.add(order);
+            }else{
+                if(searchValue.equals(fileDir.getName())){
+                    OrderDir order = new OrderDir();
+                    order.setOrderName(fileDir.getName());
+                    order.setOrderDate(DateUtil.getModifiedTime(fileDir));
+                    orderDir.add(order);
+                    break;
+                }
+            }
+
         }
         model.addAttribute("orderDir",orderDir);
-        model.addAttribute("date",DateUtil.Date2Str());
+        if(StringUtils.isEmpty(date)){
+            model.addAttribute("date",DateUtil.Date2Str());
+        }else{
+            model.addAttribute("date",date);
+        }
+
         return "downList";
     }
 
@@ -357,12 +389,54 @@ public class MyController {
      * 实现多文件上传
      * */
     @RequestMapping(value="multifileUpload",method= RequestMethod.POST)
-    public @ResponseBody
-    String multifileUpload(@RequestParam(defaultValue = "")String orderId,String remark,HttpServletRequest request,Model model) throws UnsupportedEncodingException {
+    @ResponseBody
+    public  String multifileUpload(@RequestParam(defaultValue = "")String orderId,String remark,HttpServletRequest request,Model model) throws UnsupportedEncodingException {
 
         //判断订单Id
 
         List<MultipartFile> files = ((MultipartHttpServletRequest)request).getFiles("fileName");
+        if(files.isEmpty()){
+            return "successUP";
+        }
+
+        for(MultipartFile file:files){
+            String fileName = new String(file.getOriginalFilename().getBytes(),"UTF-8");///修复中文乱码
+            int size = (int) file.getSize();
+            System.out.println(fileName + "-->" + size);
+
+            if(file.isEmpty()){
+                return "successUP";
+            }else{
+                File dest = new File(serverPath + "/" + DateUtil.Date2Str() +"/"+orderId+"/"+ fileName);
+                File datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+orderId);
+                if(!datedest.getParentFile().exists()){ //判断文件父目录是否存在
+                    datedest.getParentFile().mkdir();
+                }
+                if(!dest.getParentFile().exists()){ //判断文件父目录是否存在
+                    dest.getParentFile().mkdir();
+                }
+                try {
+                    file.transferTo(dest);
+                }catch (Exception e) {
+                    e.printStackTrace();
+                    return "successUP";
+                }
+            }
+        }
+        return "successUP";
+    }
+
+
+    /**
+     * 实现多文件上传
+     * */
+    @RequestMapping(value="upload",method= RequestMethod.POST)
+    @ResponseBody
+    public  String Upload2(@RequestParam(defaultValue = "")String orderId,HttpServletRequest request) throws UnsupportedEncodingException {
+
+        //判断订单Id
+
+        List<MultipartFile> files = ((MultipartHttpServletRequest)request).getFiles("file1");
         if(files.isEmpty()){
             return "false";
         }
