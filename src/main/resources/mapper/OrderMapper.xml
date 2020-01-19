@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hp.docker_base.mapper.OrderMapper">
+ 
+  <select id="selectAll" resultType="com.hp.docker_base.bean.OrderDir">
+    select orderName,orderDate,remark,dwState from tb_order order by orderDate desc;
+  </select>
+
+
+  <select id="selectOrderByOrderId" resultType="com.hp.docker_base.bean.OrderDir" parameterType="java.lang.String">
+    select orderName,orderDate,remark,dwState from tb_order where orderName=#{orderName};
+  </select>
+
+  <delete id="delOrderInfo" parameterType="java.lang.String">
+    delete from tb_order where orderName = #{orderName};
+  </delete>
+
+  <insert id="insertOrder" parameterType="com.hp.docker_base.bean.OrderDir">
+    insert into tb_order (id, orderName ,orderDate,dwState) values (#{id,jdbcType=INTEGER}, #{orderName,jdbcType=VARCHAR}, #{orderDate},#{dwState});
+  </insert>
+
+
+
+  <insert id="updateOrderByOrderId" parameterType="com.hp.docker_base.bean.OrderDir">
+    UPDATE tb_order  set  dwState=#{dwState} where orderName=#{orderName};
+  </insert>
+
+ <!-- <select id="findOneUserInfo" resultType="com.bee.springboot.entity.User" parameterType="java.lang.Integer">
+    select id,name  from user where id=#{id,jdbcType=INTEGER};
+  </select>
+
+  <insert id="addUserInfo" parameterType="com.bee.springboot.entity.User">
+  	insert into user (id, name ,createDate
+      )
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{createDate}
+      )
+  </insert>
+  <delete id="delUserInfo" parameterType="java.lang.Integer">
+   delete from user where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="dynaDeleteList">
+    delete from user where id in
+    <foreach collection="list" open="(" close=")" separator="," item="ids">
+      #{ids}
+    </foreach>
+  </delete>-->
+
+
+  <!--<delete id="dynaDeleteArray">
+    delete from students where students_id in
+    &lt;!&ndash; foreach用于迭代数组元素
+         open表示开始符号
+         close表示结束符合
+         separator表示元素间的分隔符
+         item表示迭代的数组，属性值可以任意，但提倡与方法的数组名相同
+         #{ids}表示数组中的每个元素值
+     &ndash;&gt;
+    <foreach collection="array" open="(" close=")" separator="," item="ids">
+      #{ids}
+    </foreach>
+  </delete>-->
+ 
+</mapper>

@@ -1,10 +1,14 @@
 package com.hp.docker_base;
 
 import com.hp.docker_base.bean.OrderDir;
+import com.hp.docker_base.service.OrderService;
+import com.hp.docker_base.service.QRServiceImpl;
 import com.hp.docker_base.util.DateUtil;
+import com.hp.docker_base.util.ToolUtil;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,7 +37,22 @@ public class MyController {
     @Value("${serverPath}")
     public  String serverPath;
 
+    @Autowired
+    private QRServiceImpl qrService;
+
+    @Autowired
+    private OrderService orderService;
+
     private static Logger logger = LoggerFactory.getLogger(MyController.class);
+
+
+
+    @RequestMapping("/test")
+    @ResponseBody
+    public List<OrderDir> test(Model model){
+
+        return orderService.selectAll();
+    }
 
 
     @RequestMapping("/index")
@@ -72,7 +91,7 @@ public class MyController {
         }
         File orderDir = new File(serverPath+"/"+date+"/"+fileDir);
         deleteFile(orderDir);
-        String downList = setDownList(model,date,null);
+        String downList = setDownList(model,date,null,null);
         return downList;
     }
 
@@ -82,7 +101,7 @@ public class MyController {
      */
     @RequestMapping("/selectDir/{date}/{search_value}")
     public String selectDir(@PathVariable("date") String date,@PathVariable("search_value") String search_value,Model model){
-        String res = setDownList(model,date,search_value);
+        String res = setDownList(model,date,search_value,null);
         return res;
     }
 
@@ -92,7 +111,7 @@ public class MyController {
      */
     @RequestMapping("/selectDir/{date}/")
     public String selectDir1(@PathVariable("date") String date,Model model){
-        String res = setDownList(model,date,null);
+        String res = setDownList(model,date,null,null);
         return res;
     }
     /**
@@ -162,7 +181,7 @@ public class MyController {
      * @return
      */
     @RequestMapping("/dw/{date}/{fileDir}")
-    public String downLoad1(@PathVariable("date") String date,@PathVariable("fileDir") String fileDir,HttpServletResponse response) throws Exception{
+    public String downLoad1(@PathVariable("date") String date,@PathVariable("fileDir") String fileDir,HttpServletResponse response,Model model) throws Exception{
 
         try{
             String zipName = fileDir+".zip";
@@ -207,9 +226,19 @@ public class MyController {
             bos.close();
         }catch(Exception e){
             e.printStackTrace();
+        }finally {
+            OrderDir orderDir = new OrderDir();
+            orderDir.setOrderName(fileDir);
+            orderDir.setDwState("已经处理");
+            orderService.updateOrderByOrderId(orderDir);
+            return setDownList(model,date,null,fileDir);
         }
 
-        return null;
+       /* OrderDir orderDir = new OrderDir();
+        orderDir.setOrderName(fileDir);
+        orderDir.setDwState("已经处理");
+        orderService.updateOrderByOrderId(orderDir);
+        return setDownList(model,date,null,fileDir);*/
     }
 
 
@@ -305,7 +334,7 @@ public class MyController {
      */
     @RequestMapping("/download/downLoadList")
     public String downLoadList(Model model) throws Exception{
-        String res = setDownList(model,null,null);
+        String res = setDownList(model,null,null,null);
         return res;
     }
 
@@ -316,7 +345,7 @@ public class MyController {
      */
     @RequestMapping("/listDate/{date}")
     public String listDate(@PathVariable("date") String date,Model model) throws Exception{
-        String res = setDownList(model,date,null);
+        String res = setDownList(model,date,null,null);
         return res;
     }
 
@@ -348,7 +377,7 @@ public class MyController {
      * @param model
      * @return
      */
-    private String setDownList(Model model,String date,String searchValue) {
+    private String setDownList(Model model,String date,String searchValue,String orderId) {
         //1. 初始化map集合Map<包含唯一标记的文件名, 简短文件名>  ;
         ArrayList<OrderDir> orderDir = new ArrayList<OrderDir>();
         if(StringUtils.isEmpty(date)){
@@ -363,6 +392,14 @@ public class MyController {
                 OrderDir order = new OrderDir();
                 order.setOrderName(fileDir.getName());
                 order.setOrderDate(DateUtil.getModifiedTime(fileDir));
+                OrderDir tmp = orderService.selectOrderByOrderId(fileDir.getName());
+
+                if(tmp==null){
+                    order.setDwState("未处理");
+                }else{
+                    System.out.println(fileDir.getName()+"----"+tmp.getDwState());
+                    order.setDwState(tmp.getDwState());
+                }
                 orderDir.add(order);
             }else{
                 if(searchValue.equals(fileDir.getName())){
@@ -370,6 +407,14 @@ public class MyController {
                     order.setOrderName(fileDir.getName());
                     order.setOrderDate(DateUtil.getModifiedTime(fileDir));
                     orderDir.add(order);
+                    OrderDir tmp = orderService.selectOrderByOrderId(fileDir.getName());
+
+                    if(tmp==null){
+                        order.setDwState("未处理");
+                    }else{
+                        System.out.println(fileDir.getName()+"----"+tmp.getDwState());
+                        order.setDwState(tmp.getDwState());
+                    }
                     break;
                 }
             }
@@ -391,39 +436,61 @@ public class MyController {
     @RequestMapping(value="multifileUpload",method= RequestMethod.POST)
     @ResponseBody
     public  String multifileUpload(@RequestParam(defaultValue = "")String orderId,String remark,HttpServletRequest request,Model model) throws UnsupportedEncodingException {
+        if(ToolUtil.isTaobaoOrder(orderId)){
+            List<MultipartFile> files = new ArrayList<>();
+            //判断订单Id
+            List<MultipartFile> file1 = ((MultipartHttpServletRequest)request).getFiles("file1");
+            if(file1.isEmpty()){
+                return "您没有选择必传文件，请选择后再提交";
+            }
+            List<MultipartFile> file2 = ((MultipartHttpServletRequest)request).getFiles("file2");
+            List<MultipartFile> file3 = ((MultipartHttpServletRequest)request).getFiles("file3");
+            files.addAll(file1);
+            files.addAll(file2);
+            files.addAll(file3);
 
-        //判断订单Id
+            if(files.isEmpty()){
+                return "您没有上传文件";
+            }
 
-        List<MultipartFile> files = ((MultipartHttpServletRequest)request).getFiles("fileName");
-        if(files.isEmpty()){
-            return "successUP";
-        }
+            for(MultipartFile file:files){
+                String fileName = new String(file.getOriginalFilename().getBytes(),"UTF-8");///修复中文乱码
+                int size = (int) file.getSize();
+                System.out.println(fileName + "-->" + size);
 
-        for(MultipartFile file:files){
-            String fileName = new String(file.getOriginalFilename().getBytes(),"UTF-8");///修复中文乱码
-            int size = (int) file.getSize();
-            System.out.println(fileName + "-->" + size);
-
-            if(file.isEmpty()){
-                return "successUP";
-            }else{
-                File dest = new File(serverPath + "/" + DateUtil.Date2Str() +"/"+orderId+"/"+ fileName);
-                File datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+orderId);
-                if(!datedest.getParentFile().exists()){ //判断文件父目录是否存在
-                    datedest.getParentFile().mkdir();
-                }
-                if(!dest.getParentFile().exists()){ //判断文件父目录是否存在
-                    dest.getParentFile().mkdir();
-                }
-                try {
-                    file.transferTo(dest);
-                }catch (Exception e) {
-                    e.printStackTrace();
+                if(file.isEmpty()){
                     return "successUP";
+                }else{
+                    File dest = new File(serverPath + "/" + DateUtil.Date2Str() +"/"+orderId+"/"+ fileName);
+                    File datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+orderId);
+                    if(!datedest.getParentFile().exists()){ //判断文件父目录是否存在
+                        datedest.getParentFile().mkdir();
+                    }
+                    if(!dest.getParentFile().exists()){ //判断文件父目录是否存在
+                        dest.getParentFile().mkdir();
+                    }
+                    try {
+                        file.transferTo(dest);
+                        qrService.transQR(serverPath + "/" + DateUtil.Date2Str()+"/"+orderId,serverPath + "/" + DateUtil.Date2Str()+"/"+orderId,400,400,"25%",10);
+                        //插入数据库记录
+                        OrderDir orderDir1 = orderService.selectOrderByOrderId(orderId);
+                        if(orderDir1==null){
+                            insertOrder(orderId);
+                        }else {
+                            orderService.delOrderInfo(orderId);
+                            insertOrder(orderId);
+                        }
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                        return "文件上传错误，请重新上传";
+                    }
                 }
             }
+            return "文件上传成功";
+        }else{
+            return "请输入正确订单号";
         }
-        return "successUP";
+
     }
 
 
@@ -433,39 +500,63 @@ public class MyController {
     @RequestMapping(value="upload",method= RequestMethod.POST)
     @ResponseBody
     public  String Upload2(@RequestParam(defaultValue = "")String orderId,HttpServletRequest request) throws UnsupportedEncodingException {
-
         //判断订单Id
+        if(ToolUtil.isTaobaoOrder(orderId)){
+            List<MultipartFile> files = ((MultipartHttpServletRequest)request).getFiles("file1");
+            if(files.isEmpty()){
+                return "您没有上传文件";
+            }
 
-        List<MultipartFile> files = ((MultipartHttpServletRequest)request).getFiles("file1");
-        if(files.isEmpty()){
-            return "false";
-        }
+            for(MultipartFile file:files){
+                String fileName = new String(file.getOriginalFilename().getBytes(),"UTF-8");///修复中文乱码
+                int size = (int) file.getSize();
+                System.out.println(fileName + "-->" + size);
 
-        for(MultipartFile file:files){
-            String fileName = new String(file.getOriginalFilename().getBytes(),"UTF-8");///修复中文乱码
-            int size = (int) file.getSize();
-            System.out.println(fileName + "-->" + size);
-
-            if(file.isEmpty()){
-                return "false";
-            }else{
-                File dest = new File(serverPath + "/" + DateUtil.Date2Str() +"/"+orderId+"/"+ fileName);
-                File datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+orderId);
-                if(!datedest.getParentFile().exists()){ //判断文件父目录是否存在
-                    datedest.getParentFile().mkdir();
-                }
-                if(!dest.getParentFile().exists()){ //判断文件父目录是否存在
-                    dest.getParentFile().mkdir();
-                }
-                try {
-                    file.transferTo(dest);
-                }catch (Exception e) {
-                    e.printStackTrace();
+                if(file.isEmpty()){
                     return "false";
+                }else{
+                    File dest = new File(serverPath + "/" + DateUtil.Date2Str() +"/"+orderId+"/"+ fileName);
+                    File datedest = new File(serverPath + "/" + DateUtil.Date2Str()+"/"+orderId);
+                    if(!datedest.getParentFile().exists()){ //判断文件父目录是否存在
+                        datedest.getParentFile().mkdir();
+                    }
+                    if(!dest.getParentFile().exists()){ //判断文件父目录是否存在
+                        dest.getParentFile().mkdir();
+                    }
+                    try {
+                        file.transferTo(dest);
+                        qrService.transQR(serverPath + "/" + DateUtil.Date2Str()+"/"+orderId,serverPath + "/" + DateUtil.Date2Str()+"/"+orderId,400,400,"25%",10);
+
+                        //插入数据库记录
+                        OrderDir orderDir1 = orderService.selectOrderByOrderId(orderId);
+                        if(orderDir1==null){
+                           insertOrder(orderId);
+                        }else {
+                            orderService.delOrderInfo(orderId);
+                            insertOrder(orderId);
+                        }
+
+
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                        return "文件上传错误，请重新上传";
+                    }
                 }
             }
+            return "文件上传成功";
+        }else {
+            return "请输入正确订单号";
         }
-        return "true";
+
     }
 
+
+    private int insertOrder(String orderId){
+        OrderDir orderDir = new OrderDir();
+        orderDir.setId(UUID.randomUUID().toString());
+        orderDir.setOrderDate(DateUtil.Date2StrLong());
+        orderDir.setOrderName(orderId);
+        orderDir.setDwState("未处理");
+        return orderService.insertOrder(orderDir);
+    }
 }

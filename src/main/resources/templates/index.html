@@ -18,7 +18,7 @@
 
             <div style="width:100%;text-align:center">
 
-                <form id="uploadForm"  action="multifileUpload" method="post" enctype="multipart/form-data" >
+                <form id="uploadForm">
 
                     <table class="table table table-hover"  align="center">
                         <tr>
@@ -28,19 +28,19 @@
                         </tr>
                         <tr>
                             <th class="text-danger">* 必传文件1:</th>
-                            <td><input type="file" name="fileName"/></td>
+                            <td><input type="file" name="file1" id="file1" /></td>
                             <td></td>
                         </tr>
 
                         <tr>
                             <th class="text-primary">选传文件2:</th>
-                            <td><input type="file" name="fileName"/></td>
+                            <td><input type="file" name="file2" id="file2" /></td>
                             <td></td>
                         </tr>
 
                         <tr>
                             <th class="text-primary">选传文件3:</th>
-                            <td><input type="file" name="fileName"/></td>
+                            <td><input type="file" name="file3" id="file3" /></td>
                             <td></td>
                         </tr>
                       <!--  <tr>
@@ -66,24 +66,50 @@
 <script src="jquery-1.10.2.min.js"></script>
 
 <script th:inline="javascript">
-    //action="multifileUpload"
-    function submit() {
+    $("#getResult").click(function(){
         var orderId = $("#orderId").val();
         //alert(orderId);
-       /* var cmd = $(texts[0]).val();
-        //alert(cmd);*/
+
+        var formData = new FormData();
+        formData.append("orderId", orderId);
+        formData.append("file1", $('#file1')[0].files[0]);
+        formData.append("file2", $('#file2')[0].files[0]);
+        formData.append("file3", $('#file3')[0].files[0]);
+       /* for(var i =0;i<$("#file1")[0].files.length;i++){
+            //fd.append("files",$("#files")[0].files[i]);
+            formData.append("file1", $('#file1')[0].files[i]);
+            formData.append("file2", $('#file2')[0].files[0]);
+            formData.append("file3", $('#file3')[0].files[0]);
+
+        }*/
+
+
         $.ajax({
-            type: "POST",
-            url: "/multifileUpload",
+            url: '/multifileUpload' ,
+            type: 'post',
             data: formData,
             cache: false,
             processData: false,
             contentType: false,
-            success: function(backData) {
-                alert(backData);
+            async: false,
+            success: function (backDate) {
+                var res = backDate;
+                alert(res);
+              /*  $("#orderId").val("");
+                $("#file1").val("");
+                $("#file2").val("")
+                $("#file3").val("")*/
+                /* if("true"==backDate){
+                     alert("文件上传成功");
+                     $("#orderId").val("");
+                     $("#file1").val("")
+                 }*/
+
+
             }
-        });
-    }
+        })
+
+    });
 </script>
 
 
