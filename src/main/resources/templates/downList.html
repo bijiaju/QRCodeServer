@@ -17,6 +17,8 @@
     <table class="table table table-hover"  align="center" border="1">
         <div style="text-align:center;">
              <a th:href="@{'/deleteView'}" th:text="返回首页"></a>
+            <a  th:text="'当前账户:'+${session.userName}"></a>
+            <a  th:href="@{'/loginout'}" th:text="退出"></a>
         </div>
 
         <thead>
@@ -32,6 +34,7 @@
             <th>订单号</th>
             <th>上传时间</th>
             <th>操作</th>
+            <th>操作人</th>
             <th>下载状态</th>
         </tr>
         </thead>
@@ -47,6 +50,7 @@
 
                <!-- <img th:src="@{/images/wrong.jpg}">-->
             <td th:text="${item.dwState}" name="dwState"></td>
+            <td th:text="${item.updateUser}"></td>
             <td th:text="${item.orderDate}"></td>
             <td>
                 <a th:href="@{'/dw/'+${date}+'/'+${item.orderName}}" th:text="下载" th:id="${'a_'+item.orderName}" ></a>

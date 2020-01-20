@@ -14,6 +14,16 @@ public class OrderDir {
 
     private String dwState;
 
+    private String updateUser;
+
+    public String getUpdateUser() {
+        return updateUser;
+    }
+
+    public void setUpdateUser(String updateUser) {
+        this.updateUser = updateUser;
+    }
+
     public String getId() {
         return id;
     }

@@ -1,8 +1,10 @@
 package com.hp.docker_base;
 
 import com.hp.docker_base.bean.OrderDir;
+import com.hp.docker_base.bean.User;
 import com.hp.docker_base.service.OrderService;
 import com.hp.docker_base.service.QRServiceImpl;
+import com.hp.docker_base.service.UserService;
 import com.hp.docker_base.util.DateUtil;
 import com.hp.docker_base.util.ToolUtil;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -19,6 +21,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -27,6 +31,7 @@ import java.util.*;
 
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Created by kemp on 2018/8/15.
@@ -43,6 +48,9 @@ public class MyController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private UserService userService;
+
     private static Logger logger = LoggerFactory.getLogger(MyController.class);
 
 
@@ -58,6 +66,36 @@ public class MyController {
     @RequestMapping("/index")
     public String index(Model model){
         return "index";
+    }
+
+    @RequestMapping("/login")
+    public String login(Model model){
+        return "login";
+    }
+
+    @RequestMapping("/canlogin")
+    public String  canlogin(Model model, @RequestParam(value = "zhanghao") String name, @RequestParam(value = "pw") String password, HttpServletResponse servletResponse,HttpServletRequest request){
+
+        HttpServletResponseWrapper wrapper = new HttpServletResponseWrapper((HttpServletResponse) servletResponse);
+        if(StringUtils.isEmpty(name)||StringUtils.isEmpty(password)){
+           // return "账号或密码不能为空";
+        }
+        User user = userService.selectUserByNameAndPassword(name, password);
+        if(user==null){
+          //  return "账号密码或错误请重试";
+        }else{
+
+            HttpSession session = request.getSession();
+            session.setAttribute("userName",name);
+            return setDownList(model,DateUtil.Date2Str(),null,null);
+        }
+        return "";
+
+    }
+
+    @RequestMapping("/register")
+    public String register(Model model){
+        return "register";
     }
 
     @RequestMapping("/upload")
@@ -181,7 +219,7 @@ public class MyController {
      * @return
      */
     @RequestMapping("/dw/{date}/{fileDir}")
-    public String downLoad1(@PathVariable("date") String date,@PathVariable("fileDir") String fileDir,HttpServletResponse response,Model model) throws Exception{
+    public String downLoad1(@PathVariable("date") String date,@PathVariable("fileDir") String fileDir,HttpServletResponse response,Model model,HttpServletRequest request) throws Exception{
 
         try{
             String zipName = fileDir+".zip";
@@ -227,9 +265,11 @@ public class MyController {
         }catch(Exception e){
             e.printStackTrace();
         }finally {
+            HttpSession session=request.getSession();
             OrderDir orderDir = new OrderDir();
             orderDir.setOrderName(fileDir);
             orderDir.setDwState("已经处理");
+            orderDir.setUpdateUser((String) session.getAttribute("userName"));
             orderService.updateOrderByOrderId(orderDir);
             return setDownList(model,date,null,fileDir);
         }
@@ -384,6 +424,9 @@ public class MyController {
             date = DateUtil.Date2Str();
         }
         File serverDir = new File(serverPath+"/"+date);
+        if (!serverDir.exists()) {
+            serverDir.mkdir();
+        }
         // 目录下，所有文件名
         File[] filesDir = serverDir.listFiles();//二级目录
         for(File fileDir :filesDir){
@@ -392,13 +435,15 @@ public class MyController {
                 OrderDir order = new OrderDir();
                 order.setOrderName(fileDir.getName());
                 order.setOrderDate(DateUtil.getModifiedTime(fileDir));
-                OrderDir tmp = orderService.selectOrderByOrderId(fileDir.getName());
 
+                OrderDir tmp = orderService.selectOrderByOrderId(fileDir.getName());
                 if(tmp==null){
                     order.setDwState("未处理");
+                    order.setUpdateUser("无");
                 }else{
                     System.out.println(fileDir.getName()+"----"+tmp.getDwState());
                     order.setDwState(tmp.getDwState());
+                    order.setUpdateUser(order.getUpdateUser());
                 }
                 orderDir.add(order);
             }else{
@@ -411,9 +456,11 @@ public class MyController {
 
                     if(tmp==null){
                         order.setDwState("未处理");
+                        order.setUpdateUser("无");
                     }else{
                         System.out.println(fileDir.getName()+"----"+tmp.getDwState());
                         order.setDwState(tmp.getDwState());
+                        order.setUpdateUser(order.getUpdateUser());
                     }
                     break;
                 }
