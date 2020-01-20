@@ -3,12 +3,12 @@
 <mapper namespace="com.hp.docker_base.mapper.OrderMapper">
  
   <select id="selectAll" resultType="com.hp.docker_base.bean.OrderDir">
-    select orderName,orderDate,remark,dwState from tb_order order by orderDate desc;
+    select orderName,orderDate,remark,dwState,orderType from tb_order order by orderDate desc;
   </select>
 
 
   <select id="selectOrderByOrderId" resultType="com.hp.docker_base.bean.OrderDir" parameterType="java.lang.String">
-    select orderName,orderDate,remark,dwState,updateUser from tb_order where orderName=#{orderName};
+    select orderName,orderDate,remark,dwState,orderType,updateUser from tb_order where orderName=#{orderName};
   </select>
 
   <delete id="delOrderInfo" parameterType="java.lang.String">
@@ -16,13 +16,13 @@
   </delete>
 
   <insert id="insertOrder" parameterType="com.hp.docker_base.bean.OrderDir">
-    insert into tb_order (id, orderName ,orderDate,dwState) values (#{id,jdbcType=INTEGER}, #{orderName,jdbcType=VARCHAR}, #{orderDate},#{dwState});
+    insert into tb_order (id, orderName ,orderDate,dwState,orderType) values (#{id,jdbcType=INTEGER}, #{orderName,jdbcType=VARCHAR}, #{orderDate},#{dwState},#{orderType});
   </insert>
 
 
 
   <insert id="updateOrderByOrderId" parameterType="com.hp.docker_base.bean.OrderDir">
-    UPDATE tb_order  set  dwState=#{dwState},updateUser=#{updateUser} where orderName=#{orderName};
+    UPDATE tb_order set dwState=#{dwState},updateUser=#{updateUser} where orderName=#{orderName};
   </insert>
 
  <!-- <select id="findOneUserInfo" resultType="com.bee.springboot.entity.User" parameterType="java.lang.Integer">

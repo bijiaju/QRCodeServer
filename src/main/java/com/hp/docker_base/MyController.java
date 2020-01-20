@@ -98,6 +98,14 @@ public class MyController {
         return "register";
     }
 
+    @RequestMapping("/loginout")
+    public String loginout(Model model,HttpServletRequest request){
+        HttpSession session=request.getSession();
+        session.removeAttribute("userName");
+        session.invalidate();
+        return "login";
+    }
+
     @RequestMapping("/upload")
     //@ResponseBody
     public String index2(Model model){
@@ -268,10 +276,14 @@ public class MyController {
             HttpSession session=request.getSession();
             OrderDir orderDir = new OrderDir();
             orderDir.setOrderName(fileDir);
+            String updateUser = (String) session.getAttribute("userName");
+            orderDir.setUpdateUser(updateUser);
             orderDir.setDwState("已经处理");
-            orderDir.setUpdateUser((String) session.getAttribute("userName"));
+
             orderService.updateOrderByOrderId(orderDir);
-            return setDownList(model,date,null,fileDir);
+            orderService.updateOrderByOrderId(orderDir);
+            return null;
+          //  return setDownList(model,date,null,fileDir);
         }
 
        /* OrderDir orderDir = new OrderDir();
@@ -440,10 +452,12 @@ public class MyController {
                 if(tmp==null){
                     order.setDwState("未处理");
                     order.setUpdateUser("无");
+                    order.setOrderType("无套餐");
                 }else{
                     System.out.println(fileDir.getName()+"----"+tmp.getDwState());
                     order.setDwState(tmp.getDwState());
-                    order.setUpdateUser(order.getUpdateUser());
+                    order.setUpdateUser(tmp.getUpdateUser());
+                    order.setOrderType(tmp.getOrderType());
                 }
                 orderDir.add(order);
             }else{
@@ -457,10 +471,12 @@ public class MyController {
                     if(tmp==null){
                         order.setDwState("未处理");
                         order.setUpdateUser("无");
+                        order.setOrderType("无套餐");
                     }else{
                         System.out.println(fileDir.getName()+"----"+tmp.getDwState());
                         order.setDwState(tmp.getDwState());
-                        order.setUpdateUser(order.getUpdateUser());
+                        order.setUpdateUser(tmp.getUpdateUser());
+                        order.setOrderType(tmp.getOrderType());
                     }
                     break;
                 }
@@ -604,6 +620,8 @@ public class MyController {
         orderDir.setOrderDate(DateUtil.Date2StrLong());
         orderDir.setOrderName(orderId);
         orderDir.setDwState("未处理");
+        orderDir.setOrderType("套餐一");
+        orderDir.setUpdateUser("无处理人");
         return orderService.insertOrder(orderDir);
     }
 }

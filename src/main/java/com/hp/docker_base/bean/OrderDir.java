@@ -16,6 +16,16 @@ public class OrderDir {
 
     private String updateUser;
 
+    private String orderType;
+
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
+    }
+
     public String getUpdateUser() {
         return updateUser;
     }
