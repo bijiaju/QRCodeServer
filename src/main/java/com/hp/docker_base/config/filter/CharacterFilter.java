@@ -45,15 +45,17 @@ public class CharacterFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
-        System.out.println("发送请求时,调用过滤器Filter的doFilter()方法..........");
+       // System.out.println("发送请求时,调用过滤器Filter的doFilter()方法..........");
         String userName = (String)((HttpServletRequest) servletRequest).getSession().getAttribute("userName");
         //放行通过
         HttpServletResponseWrapper wrapper = new HttpServletResponseWrapper((HttpServletResponse) servletResponse);
         HttpServletRequest hrequest = (HttpServletRequest)servletRequest;
         if(StringUtils.isEmpty(userName)){
             if(hrequest.getRequestURI().indexOf("/deleteView") != -1 ||
-                    hrequest.getRequestURI().indexOf("/asd") != -1 ||
+                    hrequest.getRequestURI().indexOf("/listDate") != -1 ||
                     hrequest.getRequestURI().indexOf("/download/downLoadList") != -1 ||
+                    hrequest.getRequestURI().indexOf("/register") != -1 ||
+                    hrequest.getRequestURI().indexOf("/list") != -1 ||
                     hrequest.getRequestURI().indexOf("/downList") != -1
             ) {//要拦截对象
                 wrapper.sendRedirect("/login");

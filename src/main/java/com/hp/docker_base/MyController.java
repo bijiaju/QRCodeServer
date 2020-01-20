@@ -98,6 +98,18 @@ public class MyController {
         return "register";
     }
 
+
+    @RequestMapping("/beginregister")
+    public String beginregister(Model model, @RequestParam(value = "zhanghao") String name, @RequestParam(value = "pw") String password,@RequestParam(value = "nc") String nc){
+        User user = new User();
+        user.setId(UUID.randomUUID().toString());
+        user.setName(name);
+        user.setPassword(password);
+        user.setNickname(nc);
+        userService.insertUser(user);
+        return "login";
+    }
+
     @RequestMapping("/loginout")
     public String loginout(Model model,HttpServletRequest request){
         HttpSession session=request.getSession();
@@ -282,8 +294,8 @@ public class MyController {
 
             orderService.updateOrderByOrderId(orderDir);
             orderService.updateOrderByOrderId(orderDir);
-            return null;
-          //  return setDownList(model,date,null,fileDir);
+           // return null;
+            return setDownList(model,date,null,fileDir);
         }
 
        /* OrderDir orderDir = new OrderDir();

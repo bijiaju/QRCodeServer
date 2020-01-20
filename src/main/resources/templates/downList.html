@@ -16,9 +16,9 @@
 
     <table class="table table table-hover"  align="center" border="1">
         <div style="text-align:center;">
-             <a th:href="@{'/deleteView'}" th:text="返回首页"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-            <a  th:text="'当前账户:'+${session.userName}"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-            <a  th:href="@{'/loginout'}" th:text="退出"></a>&nbsp;&nbsp;&nbsp;&nbsp;
+             <a th:href="@{'/deleteView'}" th:text="返回首页"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a  th:text="'当前账户:'+${session.userName}" id="a_user"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a  th:href="@{'/loginout'}" th:text="退出" id="a_logout"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </div>
 
         <thead>
@@ -104,9 +104,17 @@
            // $(tr_do).css("background","green");
 
         }
-
-
     });
+
+    var a_user_text = $("#a_user").text();
+    //alert(a_user_text)
+    if(a_user_text=="当前账户:毕洋强"||a_user_text=="当前账户:赵路遥"){
+       // alert("洋强登录了");<a href="/loginout">退出</a>
+        $("#a_logout").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='/register'>注册</a>");
+    }
+    /*if(){
+
+    }*/
 
 </script>
 

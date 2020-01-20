@@ -17,8 +17,9 @@
 
     <table class="table table-bordered"  align="center" border="1">
         <div style="text-align:center;">
-             <a th:href="@{'/deleteView'}" th:text="返回首页"></a>
-            <a th:href="@{'/listDate/'+${date}}" th:text="返回上一页"></a>
+
+            <a th:href="@{'/listDate/'+${date}}" th:text="返回上一页"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a th:href="@{'/deleteView'}" th:text="返回首页"></a>
         </div>
         <thead>
 
@@ -34,8 +35,8 @@
             <td th:text="${itemStat.index+1}"></td>
             <td th:text="${item}"></td>
             <td>
-                <a th:href="@{'/dwsingle/'+${date}+'/'+${fileDir}+'/'+${item}}" th:text="下载"></a>
-                <a th:href="@{'/deleteFile/'+${date}+'/'+${fileDir}+'/'+${item}}" th:text="删除"></a>
+                <a th:href="@{'/dwsingle/'+${date}+'/'+${fileDir}+'/'+${item}}" th:text="下载"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a th:href="@{'/deleteFile/'+${date}+'/'+${fileDir}+'/'+${item}}" th:text="删除"></a>
             </td>
         </tr>
         </tbody>
