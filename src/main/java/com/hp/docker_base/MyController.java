@@ -1,8 +1,10 @@
 package com.hp.docker_base;
 
 import com.hp.docker_base.bean.OrderDir;
+import com.hp.docker_base.bean.Product;
 import com.hp.docker_base.bean.User;
 import com.hp.docker_base.service.OrderService;
+import com.hp.docker_base.service.ProductService;
 import com.hp.docker_base.service.QRServiceImpl;
 import com.hp.docker_base.service.UserService;
 import com.hp.docker_base.util.DateUtil;
@@ -31,7 +33,6 @@ import java.util.*;
 
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Created by kemp on 2018/8/15.
@@ -51,6 +52,9 @@ public class MyController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ProductService productService;
+
     private static Logger logger = LoggerFactory.getLogger(MyController.class);
 
 
@@ -63,9 +67,31 @@ public class MyController {
     }
 
 
-    @RequestMapping("/index")
-    public String index(Model model){
-        return "index";
+    @RequestMapping("/product")
+    public String product(Model model){
+        List<Product> products = productService.selectAll();
+        model.addAttribute("products",products);
+        return "product";
+    }
+
+
+
+    @RequestMapping("/index1")
+    public String index1(Model model,@RequestParam(value = "pname",required = false) String pname){
+        model.addAttribute("productName",pname);
+        return "index1";
+    }
+
+    @RequestMapping("/index2")
+    public String index2(Model model,@RequestParam(value = "panme",required = false) String pname){
+        model.addAttribute("productName",pname);
+        return "index2";
+    }
+
+    @RequestMapping("/index3")
+    public String index3(Model model,@RequestParam(value = "panme",required = false) String pname){
+        model.addAttribute("productName",pname);
+        return "index3";
     }
 
     @RequestMapping("/login")
@@ -120,7 +146,7 @@ public class MyController {
 
     @RequestMapping("/upload")
     //@ResponseBody
-    public String index2(Model model){
+    public String upload(Model model){
         return "upload";
     }
 
@@ -510,7 +536,7 @@ public class MyController {
      * */
     @RequestMapping(value="multifileUpload",method= RequestMethod.POST)
     @ResponseBody
-    public  String multifileUpload(@RequestParam(defaultValue = "")String orderId,String remark,HttpServletRequest request,Model model) throws UnsupportedEncodingException {
+    public  String multifileUpload(@RequestParam(defaultValue = "")String orderId,String prod,HttpServletRequest request,Model model) throws UnsupportedEncodingException {
         if(ToolUtil.isTaobaoOrder(orderId)){
             List<MultipartFile> files = new ArrayList<>();
             //判断订单Id
@@ -550,10 +576,10 @@ public class MyController {
                         //插入数据库记录
                         OrderDir orderDir1 = orderService.selectOrderByOrderId(orderId);
                         if(orderDir1==null){
-                            insertOrder(orderId);
+                            insertOrder(orderId,prod);
                         }else {
                             orderService.delOrderInfo(orderId);
-                            insertOrder(orderId);
+                            insertOrder(orderId,prod);
                         }
                     }catch (Exception e) {
                         e.printStackTrace();
@@ -574,7 +600,7 @@ public class MyController {
      * */
     @RequestMapping(value="upload",method= RequestMethod.POST)
     @ResponseBody
-    public  String Upload2(@RequestParam(defaultValue = "")String orderId,HttpServletRequest request) throws UnsupportedEncodingException {
+    public  String Upload2(@RequestParam(defaultValue = "")String orderId,@RequestParam(value="prod", required = false)String prod,HttpServletRequest request) throws UnsupportedEncodingException {
         //判断订单Id
         if(ToolUtil.isTaobaoOrder(orderId)){
             List<MultipartFile> files = ((MultipartHttpServletRequest)request).getFiles("file1");
@@ -605,10 +631,10 @@ public class MyController {
                         //插入数据库记录
                         OrderDir orderDir1 = orderService.selectOrderByOrderId(orderId);
                         if(orderDir1==null){
-                           insertOrder(orderId);
+                           insertOrder(orderId,prod);
                         }else {
                             orderService.delOrderInfo(orderId);
-                            insertOrder(orderId);
+                            insertOrder(orderId,prod);
                         }
 
 
@@ -626,13 +652,13 @@ public class MyController {
     }
 
 
-    private int insertOrder(String orderId){
+    private int insertOrder(String orderId,String prod){
         OrderDir orderDir = new OrderDir();
         orderDir.setId(UUID.randomUUID().toString());
         orderDir.setOrderDate(DateUtil.Date2StrLong());
         orderDir.setOrderName(orderId);
         orderDir.setDwState("未处理");
-        orderDir.setOrderType("套餐一");
+        orderDir.setOrderType(prod);
         orderDir.setUpdateUser("无处理人");
         return orderService.insertOrder(orderDir);
     }

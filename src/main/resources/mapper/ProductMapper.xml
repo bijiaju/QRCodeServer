@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hp.docker_base.mapper.ProductMapper">
+
+  <select id="selectAll" resultType="com.hp.docker_base.bean.Product">
+    select * from tb_product;
+  </select>
+
+
+
+
+
+
+ <!-- <select id="selectUserByNameAndPassword" resultType="com.hp.docker_base.bean.User" parameterType="map">
+    select * from tb_user where name=#{name} and password=#{password};
+  </select>
+
+  <insert id="insertUser" parameterType="com.hp.docker_base.bean.User">
+    insert into tb_user (id, name ,nickname,password) values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{nickname},#{password});
+  </insert>-->
+
+
+
+<!--  <insert id="updateOrderByOrderId" parameterType="com.hp.docker_base.bean.OrderDir">
+    UPDATE tb_order  set  dwState=#{dwState} where orderName=#{orderName};
+  </insert>-->
+
+ <!-- <select id="findOneUserInfo" resultType="com.bee.springboot.entity.User" parameterType="java.lang.Integer">
+    select id,name  from user where id=#{id,jdbcType=INTEGER};
+  </select>
+
+  <insert id="addUserInfo" parameterType="com.bee.springboot.entity.User">
+  	insert into user (id, name ,createDate
+      )
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{createDate}
+      )
+  </insert>
+  <delete id="delUserInfo" parameterType="java.lang.Integer">
+   delete from user where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="dynaDeleteList">
+    delete from user where id in
+    <foreach collection="list" open="(" close=")" separator="," item="ids">
+      #{ids}
+    </foreach>
+  </delete>-->
+
+
+  <!--<delete id="dynaDeleteArray">
+    delete from students where students_id in
+    &lt;!&ndash; foreach用于迭代数组元素
+         open表示开始符号
+         close表示结束符合
+         separator表示元素间的分隔符
+         item表示迭代的数组，属性值可以任意，但提倡与方法的数组名相同
+         #{ids}表示数组中的每个元素值
+     &ndash;&gt;
+    <foreach collection="array" open="(" close=")" separator="," item="ids">
+      #{ids}
+    </foreach>
+  </delete>-->
+ 
+</mapper>
