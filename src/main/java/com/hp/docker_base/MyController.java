@@ -83,14 +83,14 @@ public class MyController {
     }
 
     @RequestMapping("/index2")
-    public String index2(Model model,@RequestParam(value = "panme",required = false) String pname){
-        model.addAttribute("productName",pname);
+    public String index2(Model model,@RequestParam(value = "pname",required = false) String pname){
+        model.addAttribute("productName2",pname);
         return "index2";
     }
 
     @RequestMapping("/index3")
-    public String index3(Model model,@RequestParam(value = "panme",required = false) String pname){
-        model.addAttribute("productName",pname);
+    public String index3(Model model,@RequestParam(value = "pname",required = false) String pname){
+        model.addAttribute("productName3",pname);
         return "index3";
     }
 
@@ -578,8 +578,8 @@ public class MyController {
                         if(orderDir1==null){
                             insertOrder(orderId,prod);
                         }else {
-                            orderService.delOrderInfo(orderId);
-                            insertOrder(orderId,prod);
+                            //orderService.delOrderInfo(orderId);
+                            insertOrder(orderId+"_"+prod,prod);
                         }
                     }catch (Exception e) {
                         e.printStackTrace();
